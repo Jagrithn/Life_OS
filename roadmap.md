@@ -1,0 +1,12 @@
+# Roadmap (Release 1)
+- [ ] User connects own Supabase (blocker for all data features)
+- [ ] App shell + design system + responsive nav
+- [ ] Email sign-in, profiles, onboarding, module toggles, privacy rules
+- [ ] Tasks + quick capture
+- [ ] Projects + milestones
+- [ ] Goals
+- [ ] Calendar + overload detection
+- [ ] Home dashboard
+- [ ] Habits
+- [ ] Journal + weekly review
+- [ ] Settings: export, deletion
