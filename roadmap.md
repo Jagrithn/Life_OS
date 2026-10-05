@@ -1,6 +1,7 @@
 # Roadmap (Release 1)
 - [ ] User connects own Supabase (blocker for all data features)
-- [ ] App shell + design system + responsive nav
+- [x] Design system (green-on-cream, Manrope/DM Sans) + landing page
+- [ ] App shell + responsive nav (needs Supabase for auth gate)
 - [ ] Email sign-in, profiles, onboarding, module toggles, privacy rules
 - [ ] Tasks + quick capture
 - [ ] Projects + milestones
