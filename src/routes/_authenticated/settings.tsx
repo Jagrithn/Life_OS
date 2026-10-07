@@ -27,7 +27,7 @@ function SettingsPage() {
 
   async function save() {
     const { error } = await supabase.from("profiles").upsert({ id: user.id, display_name: name.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["profile"] });
     toast.success("Saved");
   }

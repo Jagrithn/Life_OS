@@ -56,7 +56,7 @@ function Goals() {
                     defaultValue={[g.progress]}
                     max={100}
                     step={5}
-                    onValueCommit={(v) => update.mutate({ id: g.id, values: { progress: v[0] } })}
+                    onValueCommit={(v) => update.mutate({ id: g.id, values: { progress: v[0] ?? 0 } })}
                   />
                   <span className="w-10 text-right text-sm font-medium">{g.progress}%</span>
                 </div>
