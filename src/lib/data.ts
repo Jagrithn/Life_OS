@@ -42,7 +42,7 @@ export function useTableMutations<T extends TableName>(table: T) {
   });
   const update = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: Tables[T]["Update"] }) => {
-      const { error } = await supabase.from(table).update(values as never).eq("id", id);
+      const { error } = await (supabase.from(table) as any).update(values).eq("id", id);
       if (error) throw error;
     },
     onSuccess,
@@ -50,7 +50,7 @@ export function useTableMutations<T extends TableName>(table: T) {
   });
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from(table).delete().eq("id", id);
+      const { error } = await (supabase.from(table) as any).delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess,

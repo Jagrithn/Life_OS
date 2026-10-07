@@ -26,7 +26,7 @@ export function streak(habitId: string, logs: Row<"habit_logs">[]) {
   const days = lastDays(366).reverse();
   let s = 0;
   for (let i = 0; i < days.length; i++) {
-    if (set.has(days[i])) s++;
+    if (set.has(days[i]!)) s++;
     else if (i === 0) continue;
     else break;
   }
