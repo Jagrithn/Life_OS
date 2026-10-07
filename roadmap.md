@@ -1,13 +1,6 @@
 # Roadmap (Release 1)
-- [ ] User connects own Supabase (blocker for all data features)
-- [x] Design system (green-on-cream, Manrope/DM Sans) + landing page
-- [ ] App shell + responsive nav (needs Supabase for auth gate)
-- [ ] Email sign-in, profiles, onboarding, module toggles, privacy rules
-- [ ] Tasks + quick capture
-- [ ] Projects + milestones
-- [ ] Goals
-- [ ] Calendar + overload detection
-- [ ] Home dashboard
-- [ ] Habits
-- [ ] Journal + weekly review
-- [ ] Settings: export, deletion
+- [x] Backend connected, design system, landing page
+- [x] App shell + responsive nav, email sign-in/up, password reset, profiles
+- [x] Tasks, Habits, Journal, Money (INR), Goals, Home dashboard
+- [x] Settings: display name, export, delete all data
+- [ ] Release 2 ideas: calendar, projects/milestones, weekly review
