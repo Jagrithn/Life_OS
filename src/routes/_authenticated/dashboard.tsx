@@ -124,7 +124,7 @@ function Dashboard() {
   );
 }
 
-function Panel({ title, icon: Icon, to, meta, children }: { title: string; icon: typeof Flame; to: "/tasks" | "/habits" | "/goals" | "/calendar"; meta?: string; children: React.ReactNode }) {
+function Panel({ title, icon: Icon, to, meta, children }: { title: string; icon: typeof Flame; to: "/tasks" | "/habits" | "/goals" | "/calendar"; meta?: string | undefined; children: React.ReactNode }) {
   return (
     <section className="rounded-2xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between">

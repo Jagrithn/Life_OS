@@ -29,9 +29,9 @@ export function EditDialog({
   onOpenChange: (o: boolean) => void;
   title: string;
   fields: Field[];
-  initial?: Record<string, any> | null;
+  initial?: Record<string, any> | null | undefined;
   onSave: (values: Record<string, any>) => void;
-  onDelete?: () => void;
+  onDelete?: (() => void) | undefined;
   saveLabel?: string;
 }) {
   const [vals, setVals] = useState<Record<string, string>>({});
@@ -77,7 +77,7 @@ export function EditDialog({
                 {f.type === "textarea" ? (
                   <Textarea id={id} rows={4} maxLength={f.max} placeholder={f.placeholder} value={vals[f.name] ?? ""} onChange={(e) => set(e.target.value)} />
                 ) : f.type === "select" ? (
-                  <Select value={vals[f.name]} onValueChange={set}>
+                  <Select value={vals[f.name] ?? ""} onValueChange={set}>
                     <SelectTrigger id={id}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {f.nullable && <SelectItem value="none">None</SelectItem>}
@@ -117,7 +117,7 @@ export function EditDialog({
 
 /** Small helper hook for "add or edit" dialog state */
 export function useEditor<T>() {
-  const [state, setState] = useState<{ open: boolean; item: T | null; preset?: Record<string, any> }>({ open: false, item: null });
+  const [state, setState] = useState<{ open: boolean; item: T | null; preset?: Record<string, any> | undefined }>({ open: false, item: null });
   return {
     ...state,
     openNew: (preset?: Record<string, any>) => setState({ open: true, item: null, preset }),
