@@ -164,7 +164,7 @@ function CalendarPage() {
       {body}
       <EditDialog open={ed.open} onOpenChange={ed.setOpen} title={ed.item ? "Edit event" : "New event"} fields={fields} initial={ed.item ?? ed.preset}
         onSave={(v) => {
-          if (v.ends_at <= v.starts_at) v.ends_at = new Date(new Date(v.starts_at).getTime() + 3600000).toISOString();
+          if (v["ends_at"] <= v["starts_at"]) v["ends_at"] = new Date(new Date(v["starts_at"]).getTime() + 3600000).toISOString();
           ed.item ? m.update.mutate({ id: ed.item.id, values: v }) : m.insert.mutate(v as any);
         }}
         onDelete={ed.item ? () => m.remove.mutate(ed.item!.id) : undefined} />

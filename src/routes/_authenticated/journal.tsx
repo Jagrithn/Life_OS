@@ -80,7 +80,7 @@ function Journal() {
           { name: "content", label: "Entry", type: "textarea", required: true, max: 2000 },
         ]}
         initial={ed.item}
-        onSave={(v) => ed.item && update.mutate({ id: ed.item.id, values: { ...v, mood: v.mood ? Number(v.mood) : null } })}
+        onSave={(v) => ed.item && update.mutate({ id: ed.item.id, values: { ...v, mood: v["mood"] ? Number(v["mood"]) : null } })}
         onDelete={ed.item ? () => remove.mutate(ed.item!.id) : undefined}
       />
     </>
