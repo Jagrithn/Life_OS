@@ -5,9 +5,22 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Tables = Database["public"]["Tables"];
 export type TableName =
-  | "tasks" | "goals" | "habits" | "habit_logs" | "journal_entries" | "transactions"
-  | "projects" | "milestones" | "events" | "terms" | "courses" | "assessments"
-  | "books" | "learning_logs" | "weekly_reviews" | "investments";
+  | "tasks"
+  | "goals"
+  | "habits"
+  | "habit_logs"
+  | "journal_entries"
+  | "transactions"
+  | "projects"
+  | "milestones"
+  | "events"
+  | "terms"
+  | "courses"
+  | "assessments"
+  | "books"
+  | "learning_logs"
+  | "weekly_reviews"
+  | "investments";
 export type Row<T extends TableName> = Tables[T]["Row"];
 
 const orderBy: Partial<Record<TableName, { col: string; asc: boolean }>> = {
@@ -28,7 +41,9 @@ export function useRows<T extends TableName>(table: T) {
     queryKey: [table],
     queryFn: async () => {
       const o = orderBy[table] ?? { col: "created_at", asc: false };
-      const { data, error } = await (supabase.from(table) as any).select("*").order(o.col, { ascending: o.asc });
+      const { data, error } = await (supabase.from(table) as any)
+        .select("*")
+        .order(o.col, { ascending: o.asc });
       if (error) throw error;
       return data as unknown as Row<T>[];
     },
@@ -73,7 +88,8 @@ export function useProfile() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      return (await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle()).data as Profile | null;
+      return (await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle())
+        .data as Profile | null;
     },
   });
 }
@@ -91,7 +107,8 @@ export const MODULES = [
   { key: "review", label: "Weekly review", desc: "Reflect and plan" },
 ] as const;
 
-export const toISO = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+export const toISO = (d: Date) =>
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 export const todayISO = () => toISO(new Date());
 export const addDays = (iso: string, n: number) => {
   const d = new Date(iso + "T00:00");
@@ -103,10 +120,18 @@ export const weekStart = (iso: string) => {
   const day = (d.getDay() + 6) % 7;
   return addDays(iso, -day);
 };
-export const fmtDate = (iso: string, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" }) =>
-  new Date(iso.length === 10 ? iso + "T00:00" : iso).toLocaleDateString("en-IN", opts);
-export const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
-export const hoursBetween = (a: string, b: string) => Math.max(0, (new Date(b).getTime() - new Date(a).getTime()) / 3600000);
+export const fmtDate = (
+  iso: string,
+  opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" },
+) => new Date(iso.length === 10 ? iso + "T00:00" : iso).toLocaleDateString("en-IN", opts);
+export const fmtTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
+export const hoursBetween = (a: string, b: string) =>
+  Math.max(0, (new Date(b).getTime() - new Date(a).getTime()) / 3600000);
 
 export const inr = (n: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(n);

@@ -1,3 +1,7 @@
+-- Phase 2: profiles preferences, goal horizons/progress modes, and the
+-- projects, milestones, events, academics, learning, review and investment tables.
+-- All changes are additive; existing rows and columns are left untouched.
+
 alter table public.profiles add column if not exists enabled_modules text[] not null default array['tasks','habits','journal','money','goals','projects','calendar']::text[];
 alter table public.profiles add column if not exists weekly_available_hours integer not null default 40;
 alter table public.profiles add column if not exists onboarded boolean not null default false;

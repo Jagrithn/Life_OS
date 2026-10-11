@@ -85,8 +85,8 @@ function Index() {
           <span className="text-primary"> in one quiet place.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-          Tasks, habits, journal, money, and goals — private by default, simple on
-          purpose, and designed to stay out of your way.
+          Tasks, habits, journal, money, and goals — private by default, simple on purpose, and
+          designed to stay out of your way.
         </p>
       </section>
 

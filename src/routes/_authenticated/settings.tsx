@@ -11,12 +11,51 @@ import { ModulePicker } from "@/components/ModulePicker";
 import { useProfile } from "@/lib/data";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Daylight" }, { name: "description", content: "Your profile, sections and data." }] }),
+  head: () => ({
+    meta: [
+      { title: "Settings — Daylight" },
+      { name: "description", content: "Your profile, sections and data." },
+    ],
+  }),
   component: SettingsPage,
 });
 
-const tables = ["tasks", "goals", "habits", "habit_logs", "journal_entries", "transactions", "projects", "milestones", "events", "terms", "courses", "assessments", "books", "learning_logs", "weekly_reviews", "investments"] as const;
-const wipeOrder = ["habit_logs", "events", "tasks", "milestones", "projects", "habits", "journal_entries", "transactions", "goals", "assessments", "courses", "terms", "books", "learning_logs", "weekly_reviews", "investments"] as const;
+const tables = [
+  "tasks",
+  "goals",
+  "habits",
+  "habit_logs",
+  "journal_entries",
+  "transactions",
+  "projects",
+  "milestones",
+  "events",
+  "terms",
+  "courses",
+  "assessments",
+  "books",
+  "learning_logs",
+  "weekly_reviews",
+  "investments",
+] as const;
+const wipeOrder = [
+  "habit_logs",
+  "events",
+  "tasks",
+  "milestones",
+  "projects",
+  "habits",
+  "journal_entries",
+  "transactions",
+  "goals",
+  "assessments",
+  "courses",
+  "terms",
+  "books",
+  "learning_logs",
+  "weekly_reviews",
+  "investments",
+] as const;
 
 function SettingsPage() {
   const { user } = Route.useRouteContext();
@@ -33,14 +72,23 @@ function SettingsPage() {
 
   async function save() {
     const h = Math.max(1, Math.min(168, parseInt(hours) || 40));
-    const { error } = await supabase.from("profiles").update({ display_name: name.trim(), weekly_available_hours: h, enabled_modules: mods }).eq("id", user.id);
-    if (error) { toast.error(error.message); return; }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: name.trim(), weekly_available_hours: h, enabled_modules: mods })
+      .eq("id", user.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["profile"] });
     toast.success("Saved");
   }
 
   async function exportData() {
-    const out: Record<string, unknown> = { exported_at: new Date().toISOString(), email: user.email };
+    const out: Record<string, unknown> = {
+      exported_at: new Date().toISOString(),
+      email: user.email,
+    };
     for (const t of tables) out[t] = (await (supabase.from(t) as any).select("*")).data;
     const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -61,8 +109,21 @@ function SettingsPage() {
       <PageHeader title="Settings" subtitle={user.email ?? ""} />
       <section className="mb-4 space-y-4 rounded-2xl border border-border bg-card p-5">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5"><Label htmlFor="dn">Display name</Label><Input id="dn" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label htmlFor="hrs">Hours available to plan per week</Label><Input id="hrs" type="number" min={1} max={168} value={hours} onChange={(e) => setHours(e.target.value)} /></div>
+          <div className="space-y-1.5">
+            <Label htmlFor="dn">Display name</Label>
+            <Input id="dn" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="hrs">Hours available to plan per week</Label>
+            <Input
+              id="hrs"
+              type="number"
+              min={1}
+              max={168}
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Sections</Label>
@@ -74,12 +135,18 @@ function SettingsPage() {
       <section className="mb-4 rounded-2xl border border-border bg-card p-5">
         <p className="font-medium">Export your data</p>
         <p className="mb-3 text-sm text-muted-foreground">Download everything as a file.</p>
-        <Button variant="outline" onClick={exportData}>Download export</Button>
+        <Button variant="outline" onClick={exportData}>
+          Download export
+        </Button>
       </section>
       <section className="rounded-2xl border border-destructive/30 bg-card p-5">
         <p className="font-medium text-destructive">Delete all data</p>
-        <p className="mb-3 text-sm text-muted-foreground">Permanently removes everything you've added.</p>
-        <Button variant="destructive" onClick={wipe}>Delete everything</Button>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Permanently removes everything you've added.
+        </p>
+        <Button variant="destructive" onClick={wipe}>
+          Delete everything
+        </Button>
       </section>
     </>
   );

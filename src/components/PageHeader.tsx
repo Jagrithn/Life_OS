@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 
-export function PageHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children?: ReactNode;
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
       <div>
@@ -12,7 +20,15 @@ export function PageHeader({ title, subtitle, children }: { title: string; subti
   );
 }
 
-export function Empty({ title, children, action }: { title?: string; children: ReactNode; action?: ReactNode }) {
+export function Empty({
+  title,
+  children,
+  action,
+}: {
+  title?: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-border bg-secondary/40 px-6 py-10 text-center">
       {title && <p className="font-heading font-semibold">{title}</p>}
@@ -22,13 +38,29 @@ export function Empty({ title, children, action }: { title?: string; children: R
   );
 }
 
-export function Section({ title, count, action, children, className = "" }: { title: string; count?: number; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Section({
+  title,
+  count,
+  action,
+  children,
+  className = "",
+}: {
+  title: string;
+  count?: number;
+  action?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <section className={`mb-8 ${className}`}>
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
-          {count !== undefined && <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-foreground">{count}</span>}
+          {count !== undefined && (
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-foreground">
+              {count}
+            </span>
+          )}
         </h2>
         {action}
       </div>

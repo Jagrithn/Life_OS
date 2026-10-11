@@ -47,7 +47,10 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin + "/dashboard", data: { display_name: name } },
+          options: {
+            emailRedirectTo: window.location.origin + "/dashboard",
+            data: { display_name: name },
+          },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");
@@ -69,7 +72,10 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-8 shadow-sm"
+      >
         <div className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Sun className="h-5 w-5" />
@@ -77,33 +83,63 @@ function AuthPage() {
           <span className="font-heading text-lg font-bold">Daylight</span>
         </div>
         <h1 className="font-heading text-xl font-bold">
-          {mode === "in" ? "Welcome back" : mode === "up" ? "Create your account" : "Reset password"}
+          {mode === "in"
+            ? "Welcome back"
+            : mode === "up"
+              ? "Create your account"
+              : "Reset password"}
         </h1>
         {mode === "up" && (
           <div className="space-y-1.5">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="name"
+              value={name}
+              maxLength={80}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
         )}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         {mode !== "reset" && (
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              id="password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
         )}
         <Button type="submit" className="w-full" disabled={busy}>
           {mode === "in" ? "Sign in" : mode === "up" ? "Sign up" : "Send reset link"}
         </Button>
         <div className="flex justify-between text-sm">
-          <button type="button" className="text-primary hover:underline" onClick={() => setMode(mode === "up" ? "in" : "up")}>
+          <button
+            type="button"
+            className="text-primary hover:underline"
+            onClick={() => setMode(mode === "up" ? "in" : "up")}
+          >
             {mode === "up" ? "Have an account? Sign in" : "New here? Sign up"}
           </button>
           {mode === "in" && (
-            <button type="button" className="text-muted-foreground hover:underline" onClick={() => setMode("reset")}>
+            <button
+              type="button"
+              className="text-muted-foreground hover:underline"
+              onClick={() => setMode("reset")}
+            >
               Forgot?
             </button>
           )}
