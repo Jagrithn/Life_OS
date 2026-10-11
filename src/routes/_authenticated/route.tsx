@@ -2,23 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  BookOpen,
-  CalendarDays,
-  CheckSquare,
-  ClipboardCheck,
-  FolderKanban,
-  GraduationCap,
-  Flame,
-  Home,
-  Library,
-  LogOut,
-  Menu,
-  Settings,
-  Sun,
-  Target,
-  Wallet,
-} from "lucide-react";
+import { LogOut, Menu, Search, Settings, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -30,7 +14,11 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ModulePicker } from "@/components/ModulePicker";
+import { CommandPalette } from "@/components/CommandPalette";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useProfile } from "@/lib/data";
+import { useReminders } from "@/lib/notifications";
+import { navItems, visibleNav } from "@/lib/nav";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -42,29 +30,18 @@ export const Route = createFileRoute("/_authenticated")({
   component: AppShell,
 });
 
-const nav = [
-  { to: "/dashboard", label: "Home", icon: Home, mod: null },
-  { to: "/tasks", label: "Tasks", icon: CheckSquare, mod: "tasks" },
-  { to: "/calendar", label: "Calendar", icon: CalendarDays, mod: "calendar" },
-  { to: "/projects", label: "Projects", icon: FolderKanban, mod: "projects" },
-  { to: "/goals", label: "Goals", icon: Target, mod: "goals" },
-  { to: "/habits", label: "Habits", icon: Flame, mod: "habits" },
-  { to: "/journal", label: "Journal", icon: BookOpen, mod: "journal" },
-  { to: "/finance", label: "Money", icon: Wallet, mod: "money" },
-  { to: "/academics", label: "Academics", icon: GraduationCap, mod: "academics" },
-  { to: "/learning", label: "Learning", icon: Library, mod: "learning" },
-  { to: "/review", label: "Weekly review", icon: ClipboardCheck, mod: "review" },
-] as const;
-
 function AppShell() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { user } = Route.useRouteContext();
   const { data: profile } = useProfile();
   const [more, setMore] = useState(false);
+  const [cmdk, setCmdk] = useState(false);
   const [mods, setMods] = useState<string[]>([]);
-  const enabled = profile?.enabled_modules ?? nav.map((n) => n.mod).filter(Boolean);
-  const items = nav.filter((n) => !n.mod || enabled.includes(n.mod));
+  const enabled: string[] =
+    profile?.enabled_modules ?? (navItems.map((n) => n.mod).filter(Boolean) as string[]);
+  const items = visibleNav(enabled);
+  const reminders = useReminders(enabled);
   const needsSetup = !!profile && !profile.onboarded;
   useEffect(() => {
     if (profile) setMods(profile.enabled_modules ?? []);
@@ -112,6 +89,13 @@ function AppShell() {
             </Link>
           ))}
         </nav>
+        <button onClick={() => setCmdk(true)} className={linkCls} aria-label="Search (Command K)">
+          <Search className="h-4 w-4" /> Search
+          <kbd className="ml-auto rounded border border-border px-1.5 py-0.5 text-[10px] font-medium">
+            ⌘K
+          </kbd>
+        </button>
+        <NotificationBell reminders={reminders} />
         <Link
           to="/settings"
           className={linkCls}
@@ -128,9 +112,15 @@ function AppShell() {
         <span className="flex items-center gap-2 font-heading font-bold">
           <Sun className="h-5 w-5 text-primary" /> Daylight
         </span>
-        <Link to="/settings" aria-label="Settings">
-          <Settings className="h-5 w-5 text-muted-foreground" />
-        </Link>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setCmdk(true)} aria-label="Search">
+            <Search className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <NotificationBell reminders={reminders} compact />
+          <Link to="/settings" aria-label="Settings">
+            <Settings className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 animate-in fade-in duration-300 md:ml-60 md:px-10 md:pb-12 md:pt-10">
@@ -182,6 +172,8 @@ function AppShell() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <CommandPalette enabled={enabled} onSignOut={signOut} open={cmdk} onOpenChange={setCmdk} />
 
       <Dialog open={needsSetup} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-xl" onInteractOutside={(e) => e.preventDefault()}>

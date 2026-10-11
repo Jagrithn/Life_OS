@@ -2,10 +2,13 @@
 
 A calm, private "operating system for your life": tasks, habits, journal, money,
 goals, projects, calendar, academics, learning and a weekly review, all in one
-place. Every user's data is isolated with Postgres row-level security.
+place — with reminders that keep you on top of it. Every user's data is isolated
+with Postgres row-level security.
 
 ## Features
 
+- **Command palette** — press ⌘K / Ctrl K anywhere to jump between sections or create a task.
+- **Reminders** — a notifications bell for overdue and upcoming tasks, events, exams, milestones, goal targets, project deadlines, habit check-ins and the weekly review, plus optional browser notifications.
 - **Home dashboard** — today's priorities, habit check-ins, goal progress, the coming week.
 - **Tasks** — quick-add, due dates, priorities, grouped by Overdue / Today / Next 7 days / Later.
 - **Habits** — daily check-ins, streaks and a 12-week heatmap.
@@ -21,6 +24,15 @@ place. Every user's data is isolated with Postgres row-level security.
 
 Modules are opt-in: the section picker on first sign-in (and in Settings) hides
 sections you don't use without ever deleting data.
+
+### Reminders
+
+Reminders are derived from your existing data — nothing extra to configure. The
+bell in the sidebar (and the mobile header) shows anything overdue or due soon
+and respects the sections you've enabled. Open the bell and choose **Enable
+browser notifications** to get desktop notifications even when the tab is in the
+background; you can dismiss individual reminders or mark them all read, and
+dismissals are remembered locally.
 
 ## Tech stack
 
