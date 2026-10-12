@@ -30,6 +30,7 @@ export default defineConfig(({ mode, command }) => {
       ? [
           nitro({
             defaultPreset: "cloudflare-module",
+            output: { dir: "dist" },
             cloudflare: {
               wrangler: { name: "life-os" },
             },
