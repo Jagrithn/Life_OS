@@ -75,7 +75,7 @@ The app builds for **Cloudflare Workers** (free tier: 100k requests/day) and is 
 **PWA** — installable with an Add-to-Home-Screen icon and badges.
 
 ```sh
-npm run build       # emits the worker into .output/
+npm run build       # emits the worker into dist/
 npm run deploy      # builds + deploys with wrangler
 ```
 
@@ -85,7 +85,7 @@ First-time setup:
    `npx wrangler login` (or export `CLOUDFLARE_API_TOKEN`).
 2. `npm run deploy` and note your `https://<worker>.workers.dev` URL.
 3. Set the Worker secrets (Worker → Settings → Variables), either in the
-   dashboard or with `npx wrangler secret put <NAME> --config .output/server/wrangler.json`:
+   dashboard or with `npx wrangler secret put <NAME> --config dist/server/wrangler.json`:
    `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
 4. In **Supabase → Authentication → URL Configuration** set:
    - Site URL: your deployed URL
