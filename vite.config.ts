@@ -26,7 +26,16 @@ export default defineConfig(({ mode, command }) => {
         },
       },
     }),
-    ...(command === "build" ? [nitro({ defaultPreset: "cloudflare-module" })] : []),
+    ...(command === "build"
+      ? [
+          nitro({
+            defaultPreset: "cloudflare-module",
+            cloudflare: {
+              wrangler: { name: "life-os" },
+            },
+          }),
+        ]
+      : []),
     viteReact(),
   ];
 
