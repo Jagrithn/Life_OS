@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { LogOut, Menu, Search, Settings, Sun } from "lucide-react";
+import { Download, LogOut, Menu, Search, Settings, Sun } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ModulePicker } from "@/components/ModulePicker";
 import { CommandPalette } from "@/components/CommandPalette";
 import { NotificationBell } from "@/components/NotificationBell";
+import { useInstallPrompt } from "@/lib/pwa";
 import { useProfile } from "@/lib/data";
 import { useReminders } from "@/lib/notifications";
 import { navItems, visibleNav } from "@/lib/nav";
@@ -42,6 +43,7 @@ function AppShell() {
     profile?.enabled_modules ?? (navItems.map((n) => n.mod).filter(Boolean) as string[]);
   const items = visibleNav(enabled);
   const reminders = useReminders(enabled);
+  const { canInstall, install } = useInstallPrompt();
   const needsSetup = !!profile && !profile.onboarded;
   useEffect(() => {
     if (profile) setMods(profile.enabled_modules ?? []);
@@ -96,6 +98,11 @@ function AppShell() {
           </kbd>
         </button>
         <NotificationBell reminders={reminders} />
+        {canInstall && (
+          <button onClick={install} className={linkCls} aria-label="Install app">
+            <Download className="h-4 w-4" /> Install app
+          </button>
+        )}
         <Link
           to="/settings"
           className={linkCls}

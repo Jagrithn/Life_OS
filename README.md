@@ -69,6 +69,33 @@ project (for example with `supabase db push`, or by running the SQL in the
 SQL editor). Row-level security is enabled on every table so each user only
 ever sees their own rows.
 
+### Deploy to Cloudflare (free)
+
+The app builds for **Cloudflare Workers** (free tier: 100k requests/day) and is a
+**PWA** — installable with an Add-to-Home-Screen icon and badges.
+
+```sh
+npm run build       # emits the worker into .output/
+npm run deploy      # builds + deploys with wrangler
+```
+
+First-time setup:
+
+1. Create a free [Cloudflare](https://cloudflare.com) account and run
+   `npx wrangler login` (or export `CLOUDFLARE_API_TOKEN`).
+2. `npm run deploy` and note your `https://<worker>.workers.dev` URL.
+3. Set the Worker secrets (Worker → Settings → Variables), either in the
+   dashboard or with `npx wrangler secret put <NAME> --config .output/server/wrangler.json`:
+   `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+4. In **Supabase → Authentication → URL Configuration** set:
+   - Site URL: your deployed URL
+   - Redirect URLs: `https://<your-url>/dashboard` and `https://<your-url>/reset-password`
+     (keep `http://localhost:5173/**` for development). Enable "Confirm email".
+5. Re-test sign-up and password reset over HTTPS, then install the app to your
+   home screen (Chrome/Edge show an install prompt; iOS uses Add to Home Screen).
+
+Add your own domain any time on the Cloudflare dashboard — no code changes needed.
+
 ## Scripts
 
 | Command             | Description                  |
