@@ -31,10 +31,19 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to process.env for SSR (server-side rendering)
+  // Public (publishable) values for this project. Safe to ship in the browser;
+  // used when the hosting provider (e.g. Cloudflare) has no/mismatched env vars.
+  const DEFAULT_URL = "https://mxpxhfhmiyyidqkwxvaz.supabase.co";
+  const DEFAULT_KEY = "sb_publishable__4nfRe6_PBzGsEYoI9sKqQ_fL3E9orK";
   const processEnv = typeof process !== "undefined" ? process.env : undefined;
-  const SUPABASE_URL = import.meta.env["VITE_SUPABASE_URL"] || processEnv?.["SUPABASE_URL"];
-  const SUPABASE_PUBLISHABLE_KEY =
+  const envUrl = import.meta.env["VITE_SUPABASE_URL"] || processEnv?.["SUPABASE_URL"];
+  const envKey =
     import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] || processEnv?.["SUPABASE_PUBLISHABLE_KEY"];
+  // Only trust env values as a matched pair; a URL from one project with a key
+  // from another is the classic "Invalid API key" error.
+  const useEnv = !!envUrl && !!envKey && envUrl !== DEFAULT_URL;
+  const SUPABASE_URL = useEnv ? envUrl : DEFAULT_URL;
+  const SUPABASE_PUBLISHABLE_KEY = useEnv ? envKey : DEFAULT_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
