@@ -8,10 +8,10 @@ import { Empty, PageHeader, Section } from "@/components/PageHeader";
 import { EditDialog, useEditor, type Field } from "@/components/EditDialog";
 import { addDays, fmtDate, todayISO, useRows, useTableMutations, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/tasks")({
+export const Route = createFileRoute("/_app/tasks")({
   head: () => ({
     meta: [
-      { title: "Tasks — Daylight" },
+      { title: "Tasks — Ordo" },
       { name: "description", content: "Capture, plan and finish your tasks." },
     ],
   }),

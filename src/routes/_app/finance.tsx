@@ -17,10 +17,10 @@ import { EditDialog, useEditor, type Field } from "@/components/EditDialog";
 import { CrudList } from "@/components/CrudList";
 import { fmtDate, inr, todayISO, useRows, useTableMutations, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/finance")({
+export const Route = createFileRoute("/_app/finance")({
   head: () => ({
     meta: [
-      { title: "Money — Daylight" },
+      { title: "Money — Ordo" },
       { name: "description", content: "Track income, spending and savings in INR." },
     ],
   }),

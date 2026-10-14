@@ -3,10 +3,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { CrudList } from "@/components/CrudList";
 import { fmtDate, todayISO, useRows, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/learning")({
+export const Route = createFileRoute("/_app/learning")({
   head: () => ({
     meta: [
-      { title: "Reading & Learning — Daylight" },
+      { title: "Reading & Learning — Ordo" },
       { name: "description", content: "Your book list with takeaways and a learning log." },
     ],
   }),

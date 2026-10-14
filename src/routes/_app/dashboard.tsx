@@ -15,12 +15,9 @@ import {
 import { streak } from "./habits";
 import { goalProgress } from "./goals";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
-    meta: [
-      { title: "Today — Daylight" },
-      { name: "description", content: "Your day at a glance." },
-    ],
+    meta: [{ title: "Today — Ordo" }, { name: "description", content: "Your day at a glance." }],
   }),
   component: Dashboard,
 });
@@ -178,7 +175,7 @@ function Dashboard() {
               </p>
             ) : (
               goals.slice(0, 4).map((g) => {
-                const pct = goalProgress(g, tasks, projects, milestones);
+                const pct = goalProgress(g, tasks, projects, milestones, goals);
                 return (
                   <div key={g.id} className="py-1.5">
                     <div className="flex justify-between text-sm">

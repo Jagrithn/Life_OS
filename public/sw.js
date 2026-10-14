@@ -1,4 +1,4 @@
-const VERSION = "daylight-v1";
+const VERSION = "ordo-v1";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -28,7 +28,7 @@ self.addEventListener("fetch", (event) => {
       fetch(request).catch(
         () =>
           new Response(
-            "<!doctype html><meta charset=utf-8><title>Offline</title><body style='font-family:system-ui;padding:2rem;text-align:center'>You're offline. Reconnect to use Daylight.</body>",
+            "<!doctype html><meta charset=utf-8><title>Offline</title><body style='font-family:system-ui;padding:2rem;text-align:center'>You're offline. Reconnect to use Ordo.</body>",
             { headers: { "content-type": "text/html; charset=utf-8" } },
           ),
       ),

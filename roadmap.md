@@ -10,11 +10,13 @@
 - [x] Settings: display name, available hours, section picker, export, delete all data
 - [x] Global search and command palette (⌘K)
 - [x] Reminders / notifications (in-app bell + optional browser notifications)
+- [x] Rebrand to Ordo: strict monochrome design, minimal ring mark, light/dark/system theme
 
 ## Next
 
+- [ ] 100% local-first offline storage (IndexedDB) and removal of the cloud/auth barrier
+- [ ] Backup export + import (.json)
+- [ ] Multi-horizon, nested reverse-engineering goals with cascading progress
 - [ ] Recurring tasks and habits
 - [ ] Budgets and recurring transactions
-- [ ] Email / push reminders (server-delivered)
-- [ ] Dark mode toggle (theme tokens already defined)
 - [ ] More component and unit test coverage

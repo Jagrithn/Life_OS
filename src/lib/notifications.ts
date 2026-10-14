@@ -17,8 +17,8 @@ export interface AppNotification {
 }
 
 const DAY = 86_400_000;
-const DISMISSED_KEY = "daylight:dismissed-notifications";
-const NOTIFIED_KEY = "daylight:browser-notified";
+const DISMISSED_KEY = "ordo:dismissed-notifications";
+const NOTIFIED_KEY = "ordo:browser-notified";
 const MAX_BROWSER_PER_RUN = 5;
 
 function startOfDay(d: Date) {
@@ -223,7 +223,16 @@ function loadIds(key: string): string[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    if (raw) return JSON.parse(raw) as string[];
+    // One-time migration from the pre-rename "Daylight" keys.
+    const legacyKey = key.replace(/^ordo:/, "daylight:");
+    const legacy = window.localStorage.getItem(legacyKey);
+    if (legacy) {
+      window.localStorage.setItem(key, legacy);
+      window.localStorage.removeItem(legacyKey);
+      return JSON.parse(legacy) as string[];
+    }
+    return [];
   } catch {
     return [];
   }

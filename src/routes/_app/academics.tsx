@@ -3,10 +3,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { CrudList } from "@/components/CrudList";
 import { fmtDate, todayISO, useRows, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/academics")({
+export const Route = createFileRoute("/_app/academics")({
   head: () => ({
     meta: [
-      { title: "Academics — Daylight" },
+      { title: "Academics — Ordo" },
       { name: "description", content: "Terms, courses, assignments and exams." },
     ],
   }),

@@ -11,9 +11,9 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { registerServiceWorker } from "@/lib/pwa";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -26,7 +26,7 @@ function NotFoundComponent() {
         </p>
         <div className="mt-6">
           <Link
-            to="/"
+            to="/dashboard"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Go home
@@ -61,7 +61,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             Try again
           </button>
           <a
-            href="/"
+            href="/dashboard"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home
@@ -77,24 +77,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Daylight Life OS" },
+      { title: "Ordo" },
       {
         name: "description",
         content:
-          "Daylight Life OS brings your tasks, habits, journal, finances, and goals into one calm, private space.",
+          "Ordo is a calm, private personal operating system — tasks, habits, journal, money, goals and more, all offline-first.",
       },
-      { name: "theme-color", content: "#0ea5e9" },
+      { name: "theme-color", content: "#ffffff" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-      { name: "apple-mobile-web-app-title", content: "Daylight" },
-      { property: "og:title", content: "Daylight Life OS" },
+      { name: "apple-mobile-web-app-title", content: "Ordo" },
+      { property: "og:title", content: "Ordo" },
       {
         property: "og:description",
         content:
-          "Tasks, habits, journal, money and goals in one calm, private space — with reminders.",
+          "Tasks, habits, journal, money and goals in one calm, private space — offline-first and free forever.",
       },
       { property: "og:type", content: "website" },
     ],
+    scripts: [{ children: THEME_INIT_SCRIPT }],
     links: [
       {
         rel: "stylesheet",
@@ -107,6 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Manrope:wght@500;600;700;800&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/icons/icon.svg", type: "image/svg+xml" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
@@ -137,17 +139,10 @@ function RootComponent() {
 
   useEffect(() => {
     registerServiceWorker();
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-    });
-    return () => data.subscription.unsubscribe();
-  }, [router, queryClient]);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>

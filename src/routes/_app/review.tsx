@@ -16,10 +16,10 @@ import {
   weekStart,
 } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/review")({
+export const Route = createFileRoute("/_app/review")({
   head: () => ({
     meta: [
-      { title: "Weekly Review — Daylight" },
+      { title: "Weekly Review — Ordo" },
       { name: "description", content: "Reflect on wins, obstacles and next week's priorities." },
     ],
   }),

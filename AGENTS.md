@@ -1,4 +1,4 @@
-# Agent notes — Daylight Life OS
+# Agent notes — Ordo
 
 ## Commands
 

@@ -1,9 +1,8 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Download, LogOut, Menu, Search, Settings, Sun } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Download, LogOut, Menu, Search, Settings } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,17 +15,29 @@ import { Button } from "@/components/ui/button";
 import { ModulePicker } from "@/components/ModulePicker";
 import { CommandPalette } from "@/components/CommandPalette";
 import { NotificationBell } from "@/components/NotificationBell";
+import { OrdoMark } from "@/components/OrdoMark";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useInstallPrompt } from "@/lib/pwa";
-import { useProfile } from "@/lib/data";
+import { useProfile, insertRow, updateRow, type Profile } from "@/lib/data";
 import { useReminders } from "@/lib/notifications";
 import { navItems, visibleNav } from "@/lib/nav";
 
-export const Route = createFileRoute("/_authenticated")({
+export const Route = createFileRoute("/_app")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    await import("@/lib/data").then(({ initStore }) => initStore());
+    const profiles = await import("@/lib/store").then(({ selectAll }) => selectAll("profiles"));
+    let profile = profiles[0];
+    if (!profile) {
+      profile = (await insertRow("profiles", {
+        id: "local-user",
+        display_name: "You",
+        weekly_available_hours: 40,
+        enabled_modules: navItems.map((n) => n.mod).filter(Boolean) as string[],
+        onboarded: false,
+      })) as Profile;
+    }
+    return { user: { id: "local-user", email: "local@ordo" }, profile };
   },
   component: AppShell,
 });
@@ -34,37 +45,25 @@ export const Route = createFileRoute("/_authenticated")({
 function AppShell() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { user } = Route.useRouteContext();
+  const { user, profile: ctxProfile } = Route.useRouteContext();
   const { data: profile } = useProfile();
   const [more, setMore] = useState(false);
   const [cmdk, setCmdk] = useState(false);
   const [mods, setMods] = useState<string[]>([]);
+  const effectiveProfile = profile ?? ctxProfile;
   const enabled: string[] =
-    profile?.enabled_modules ?? (navItems.map((n) => n.mod).filter(Boolean) as string[]);
+    effectiveProfile?.enabled_modules ?? (navItems.map((n) => n.mod).filter(Boolean) as string[]);
   const items = visibleNav(enabled);
   const reminders = useReminders(enabled);
   const { canInstall, install } = useInstallPrompt();
-  const needsSetup = !!profile && !profile.onboarded;
+  const needsSetup = !!effectiveProfile && !effectiveProfile.onboarded;
   useEffect(() => {
-    if (profile) setMods(profile.enabled_modules ?? []);
-  }, [profile]);
+    if (effectiveProfile) setMods(effectiveProfile.enabled_modules ?? []);
+  }, [effectiveProfile]);
 
   async function finishSetup() {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ enabled_modules: mods, onboarded: true })
-      .eq("id", user.id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    await updateRow("profiles", "local-user", { enabled_modules: mods, onboarded: true });
     qc.invalidateQueries({ queryKey: ["profile"] });
-  }
-  async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
   }
   const linkCls =
     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -75,9 +74,9 @@ function AppShell() {
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-border bg-card p-4 md:flex">
         <Link to="/dashboard" className="mb-8 flex items-center gap-2 px-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Sun className="h-5 w-5" />
+            <OrdoMark className="h-5 w-5" />
           </span>
-          <span className="font-heading text-lg font-bold">Daylight</span>
+          <span className="font-heading text-lg font-bold tracking-tight">Ordo</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto">
           {items.map((n) => (
@@ -98,6 +97,9 @@ function AppShell() {
           </kbd>
         </button>
         <NotificationBell reminders={reminders} />
+        <div className="mb-1 mt-1 px-1">
+          <ThemeToggle className="w-full justify-center" />
+        </div>
         {canInstall && (
           <button onClick={install} className={linkCls} aria-label="Install app">
             <Download className="h-4 w-4" /> Install app
@@ -110,14 +112,11 @@ function AppShell() {
         >
           <Settings className="h-4 w-4" /> Settings
         </Link>
-        <button onClick={signOut} className={linkCls}>
-          <LogOut className="h-4 w-4" /> Sign out
-        </button>
       </aside>
 
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
         <span className="flex items-center gap-2 font-heading font-bold">
-          <Sun className="h-5 w-5 text-primary" /> Daylight
+          <OrdoMark className="h-5 w-5" /> Ordo
         </span>
         <div className="flex items-center gap-3">
           <button onClick={() => setCmdk(true)} aria-label="Search">
@@ -169,23 +168,16 @@ function AppShell() {
                 {n.label}
               </Link>
             ))}
-            <button
-              onClick={signOut}
-              className="flex flex-col items-center gap-1 rounded-xl border border-border p-3 text-xs"
-            >
-              <LogOut className="h-5 w-5" />
-              Sign out
-            </button>
           </div>
         </SheetContent>
       </Sheet>
 
-      <CommandPalette enabled={enabled} onSignOut={signOut} open={cmdk} onOpenChange={setCmdk} />
+      <CommandPalette enabled={enabled} onSignOut={() => {}} open={cmdk} onOpenChange={setCmdk} />
 
       <Dialog open={needsSetup} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle className="font-heading text-xl">Make Daylight yours</DialogTitle>
+            <DialogTitle className="font-heading text-xl">Make Ordo yours</DialogTitle>
             <DialogDescription>
               Pick the sections you want. You can change this any time in Settings — hiding a
               section never deletes its data.

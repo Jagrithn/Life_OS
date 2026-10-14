@@ -6,10 +6,10 @@ import { Empty, PageHeader, Section } from "@/components/PageHeader";
 import { EditDialog, useEditor } from "@/components/EditDialog";
 import { fmtDate, todayISO, useRows, useTableMutations, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/journal")({
+export const Route = createFileRoute("/_app/journal")({
   head: () => ({
     meta: [
-      { title: "Journal — Daylight" },
+      { title: "Journal — Ordo" },
       { name: "description", content: "A private place to reflect." },
     ],
   }),

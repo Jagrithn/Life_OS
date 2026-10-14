@@ -17,10 +17,10 @@ import { Empty, PageHeader, Section } from "@/components/PageHeader";
 import { EditDialog, useEditor, type Field } from "@/components/EditDialog";
 import { addDays, fmtDate, todayISO, useRows, useTableMutations, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/projects")({
+export const Route = createFileRoute("/_app/projects")({
   head: () => ({
     meta: [
-      { title: "Projects — Daylight" },
+      { title: "Projects — Ordo" },
       { name: "description", content: "Projects with outcomes, milestones and linked tasks." },
     ],
   }),
@@ -147,7 +147,7 @@ function Projects() {
           }
         >
           A project is anything with an outcome and a deadline — a submission, a launch, a move. Add
-          milestones, or let Daylight break the deadline into earlier steps.
+          milestones, or let Ordo break the deadline into earlier steps.
         </Empty>
       ) : (
         groups.map(([label, list]) => (

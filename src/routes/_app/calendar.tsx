@@ -18,10 +18,10 @@ import {
   type Row,
 } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/calendar")({
+export const Route = createFileRoute("/_app/calendar")({
   head: () => ({
     meta: [
-      { title: "Calendar — Daylight" },
+      { title: "Calendar — Ordo" },
       {
         name: "description",
         content: "Month, week and day planning with events, deadlines and focus blocks.",

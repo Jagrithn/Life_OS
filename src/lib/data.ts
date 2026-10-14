@@ -1,9 +1,43 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import {
+  useTable,
+  useTableByUserId,
+  createMutations,
+  initStore,
+  exportData,
+  importData,
+  wipeData,
+  selectAll,
+  selectById,
+  insertRow,
+  updateRow,
+  deleteRow,
+} from "./store";
 
-type Tables = Database["public"]["Tables"];
+export { insertRow, updateRow, initStore, selectAll, selectById, deleteRow };
+
+type Tables = {
+  tasks: any;
+  goals: any;
+  habits: any;
+  habit_logs: any;
+  journal_entries: any;
+  transactions: any;
+  projects: any;
+  milestones: any;
+  events: any;
+  terms: any;
+  courses: any;
+  assessments: any;
+  books: any;
+  learning_logs: any;
+  weekly_reviews: any;
+  investments: any;
+  profiles: any;
+  settings: any;
+};
+
 export type TableName =
   | "tasks"
   | "goals"
@@ -20,8 +54,11 @@ export type TableName =
   | "books"
   | "learning_logs"
   | "weekly_reviews"
-  | "investments";
-export type Row<T extends TableName> = Tables[T]["Row"];
+  | "investments"
+  | "profiles"
+  | "settings";
+
+export type Row<T extends TableName> = Tables[T];
 
 const orderBy: Partial<Record<TableName, { col: string; asc: boolean }>> = {
   habits: { col: "created_at", asc: true },
@@ -36,17 +73,35 @@ const orderBy: Partial<Record<TableName, { col: string; asc: boolean }>> = {
   investments: { col: "as_of", asc: false },
 };
 
+let storeInitialized = false;
+
+async function ensureStore() {
+  if (!storeInitialized) {
+    await initStore();
+    storeInitialized = true;
+  }
+}
+
+function sortRows<T extends TableName>(table: T, rows: Row<T>[]): Row<T>[] {
+  const o = orderBy[table] ?? { col: "created_at", asc: false };
+  return [...rows].sort((a, b) => {
+    const av = a[o.col];
+    const bv = b[o.col];
+    if (av === bv) return 0;
+    const cmp = String(av).localeCompare(String(bv));
+    return o.asc ? cmp : -cmp;
+  });
+}
+
 export function useRows<T extends TableName>(table: T) {
   return useQuery({
     queryKey: [table],
     queryFn: async () => {
-      const o = orderBy[table] ?? { col: "created_at", asc: false };
-      const { data, error } = await (supabase.from(table) as any)
-        .select("*")
-        .order(o.col, { ascending: o.asc });
-      if (error) throw error;
-      return data as unknown as Row<T>[];
+      await ensureStore();
+      const rows = selectAll(table);
+      return sortRows(table, rows as Row<T>[]);
     },
+    initialData: [],
   });
 }
 
@@ -54,43 +109,46 @@ export function useTableMutations<T extends TableName>(table: T) {
   const qc = useQueryClient();
   const onSuccess = () => qc.invalidateQueries({ queryKey: [table] });
   const onError = (e: Error) => toast.error(e.message);
-  const insert = useMutation({
-    mutationFn: async (values: Tables[T]["Insert"] | Tables[T]["Insert"][]) => {
-      const { error } = await (supabase.from(table) as any).insert(values);
-      if (error) throw error;
-    },
-    onSuccess,
-    onError,
-  });
-  const update = useMutation({
-    mutationFn: async ({ id, values }: { id: string; values: Tables[T]["Update"] }) => {
-      const { error } = await (supabase.from(table) as any).update(values).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess,
-    onError,
-  });
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await (supabase.from(table) as any).delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess,
-    onError,
-  });
-  return { insert, update, remove };
+  const mut = createMutations(table);
+  return {
+    insert: useMutation({
+      mutationFn: async (values: any | any[]) => {
+        if (Array.isArray(values)) {
+          for (const v of values) await mut.insert(v);
+        } else {
+          await mut.insert(values);
+        }
+      },
+      onSuccess,
+      onError,
+    }),
+    update: useMutation({
+      mutationFn: async ({ id, values }: { id: string; values: any }) => {
+        await mut.update(id, values);
+      },
+      onSuccess,
+      onError,
+    }),
+    remove: useMutation({
+      mutationFn: async (id: string) => {
+        await mut.remove(id);
+      },
+      onSuccess,
+      onError,
+    }),
+  };
 }
 
-export type Profile = Tables["profiles"]["Row"];
+export type Profile = Row<"profiles">;
 export function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return null;
-      return (await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle())
-        .data as Profile | null;
+      await ensureStore();
+      const profiles = selectAll("profiles");
+      return (profiles[0] as Profile) ?? null;
     },
+    initialData: null,
   });
 }
 
@@ -135,3 +193,18 @@ export const inr = (n: number) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(n);
+
+export async function exportAllData() {
+  await ensureStore();
+  return exportData();
+}
+
+export async function importAllData(data: Record<string, unknown[]>) {
+  await ensureStore();
+  await importData(data);
+}
+
+export async function wipeAllData() {
+  await ensureStore();
+  await wipeData();
+}

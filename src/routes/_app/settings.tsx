@@ -2,68 +2,31 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/PageHeader";
 import { ModulePicker } from "@/components/ModulePicker";
-import { useProfile } from "@/lib/data";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useProfile, updateRow, exportAllData, importAllData, wipeAllData } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/settings")({
+export const Route = createFileRoute("/_app/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — Daylight" },
-      { name: "description", content: "Your profile, sections and data." },
+      { title: "Settings — Ordo" },
+      { name: "description", content: "Your profile, appearance, sections and data." },
     ],
   }),
   component: SettingsPage,
 });
 
-const tables = [
-  "tasks",
-  "goals",
-  "habits",
-  "habit_logs",
-  "journal_entries",
-  "transactions",
-  "projects",
-  "milestones",
-  "events",
-  "terms",
-  "courses",
-  "assessments",
-  "books",
-  "learning_logs",
-  "weekly_reviews",
-  "investments",
-] as const;
-const wipeOrder = [
-  "habit_logs",
-  "events",
-  "tasks",
-  "milestones",
-  "projects",
-  "habits",
-  "journal_entries",
-  "transactions",
-  "goals",
-  "assessments",
-  "courses",
-  "terms",
-  "books",
-  "learning_logs",
-  "weekly_reviews",
-  "investments",
-] as const;
-
 function SettingsPage() {
-  const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const { data: profile } = useProfile();
   const [name, setName] = useState("");
   const [hours, setHours] = useState("40");
   const [mods, setMods] = useState<string[]>([]);
+  const [importFile, setImportFile] = useState<File | null>(null);
   useEffect(() => {
     setName(profile?.display_name ?? "");
     setHours(String(profile?.weekly_available_hours ?? 40));
@@ -72,41 +35,51 @@ function SettingsPage() {
 
   async function save() {
     const h = Math.max(1, Math.min(168, parseInt(hours) || 40));
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: name.trim(), weekly_available_hours: h, enabled_modules: mods })
-      .eq("id", user.id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    await updateRow("profiles", "local-user", {
+      display_name: name.trim(),
+      weekly_available_hours: h,
+      enabled_modules: mods,
+    });
     qc.invalidateQueries({ queryKey: ["profile"] });
     toast.success("Saved");
   }
 
-  async function exportData() {
-    const out: Record<string, unknown> = {
-      exported_at: new Date().toISOString(),
-      email: user.email,
-    };
-    for (const t of tables) out[t] = (await (supabase.from(t) as any).select("*")).data;
-    const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+  async function handleExport() {
+    const data = await exportAllData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `daylight-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `ordo-export-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
   }
 
+  async function handleImport() {
+    if (!importFile) return;
+    const text = await importFile.text();
+    const data = JSON.parse(text);
+    await importAllData(data);
+    qc.invalidateQueries();
+    toast.success("Imported successfully");
+    setImportFile(null);
+  }
+
   async function wipe() {
-    if (!confirm("Delete ALL your Daylight data? This cannot be undone.")) return;
-    for (const t of wipeOrder) await (supabase.from(t) as any).delete().eq("user_id", user.id);
+    if (!confirm("Delete ALL your Ordo data? This cannot be undone.")) return;
+    await wipeAllData();
     qc.invalidateQueries();
     toast.success("All data deleted");
   }
 
   return (
     <>
-      <PageHeader title="Settings" subtitle={user.email ?? ""} />
+      <PageHeader title="Settings" subtitle="Your profile, appearance, sections and data." />
+      <section className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-5">
+        <div>
+          <p className="font-medium">Appearance</p>
+          <p className="text-sm text-muted-foreground">Light, dark, or follow your system.</p>
+        </div>
+        <ThemeToggle />
+      </section>
       <section className="mb-4 space-y-4 rounded-2xl border border-border bg-card p-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
@@ -134,10 +107,34 @@ function SettingsPage() {
       </section>
       <section className="mb-4 rounded-2xl border border-border bg-card p-5">
         <p className="font-medium">Export your data</p>
-        <p className="mb-3 text-sm text-muted-foreground">Download everything as a file.</p>
-        <Button variant="outline" onClick={exportData}>
+        <p className="mb-3 text-sm text-muted-foreground">Download everything as a JSON file.</p>
+        <Button variant="outline" onClick={handleExport}>
           Download export
         </Button>
+      </section>
+      <section className="mb-4 rounded-2xl border border-border bg-card p-5">
+        <p className="font-medium">Import data</p>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Restore from a previously exported JSON file.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            accept=".json"
+            className="sr-only"
+            id="import-file"
+            onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+          />
+          <label htmlFor="import-file" className="cursor-pointer">
+            <Button variant="outline">Choose file</Button>
+          </label>
+          {importFile && (
+            <>
+              <span className="text-sm text-muted-foreground">{importFile.name}</span>
+              <Button onClick={handleImport}>Import</Button>
+            </>
+          )}
+        </div>
       </section>
       <section className="rounded-2xl border border-destructive/30 bg-card p-5">
         <p className="font-medium text-destructive">Delete all data</p>

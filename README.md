@@ -1,9 +1,9 @@
-# Daylight — Life OS
+# Ordo — Life OS
 
 A calm, private "operating system for your life": tasks, habits, journal, money,
 goals, projects, calendar, academics, learning and a weekly review, all in one
-place — with reminders that keep you on top of it. Every user's data is isolated
-with Postgres row-level security.
+place — with reminders that keep you on top of it. Designed in a strict
+monochrome system with a light/dark theme.
 
 ## Features
 
@@ -20,6 +20,7 @@ with Postgres row-level security.
 - **Academics** — terms, courses, assignments and exams (also shown on the calendar).
 - **Reading & learning** — book list with takeaways and a practice log.
 - **Weekly review** — guided prompts plus an automatic summary of the week.
+- **Appearance** — light, dark or system theme with a FOUC-free switch.
 - **Settings** — display name, available hours, section picker, data export and delete-all.
 
 Modules are opt-in: the section picker on first sign-in (and in Settings) hides

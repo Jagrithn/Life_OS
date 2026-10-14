@@ -7,10 +7,10 @@ import { Empty, PageHeader } from "@/components/PageHeader";
 import { EditDialog, useEditor } from "@/components/EditDialog";
 import { fmtDate, todayISO, toISO, useRows, useTableMutations, type Row } from "@/lib/data";
 
-export const Route = createFileRoute("/_authenticated/habits")({
+export const Route = createFileRoute("/_app/habits")({
   head: () => ({
     meta: [
-      { title: "Habits — Daylight" },
+      { title: "Habits — Ordo" },
       { name: "description", content: "Build streaks and see your consistency over time." },
     ],
   }),

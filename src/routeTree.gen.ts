@@ -10,161 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthenticatedAcademicsRouteImport } from './routes/_authenticated/academics'
-import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
-import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
-import { Route as AuthenticatedHabitsRouteImport } from './routes/_authenticated/habits'
-import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
-import { Route as AuthenticatedLearningRouteImport } from './routes/_authenticated/learning'
-import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticated/projects'
-import { Route as AuthenticatedReviewRouteImport } from './routes/_authenticated/review'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as AppAcademicsRouteImport } from './routes/_app/academics'
+import { Route as AppCalendarRouteImport } from './routes/_app/calendar'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppFinanceRouteImport } from './routes/_app/finance'
+import { Route as AppGoalsRouteImport } from './routes/_app/goals'
+import { Route as AppHabitsRouteImport } from './routes/_app/habits'
+import { Route as AppJournalRouteImport } from './routes/_app/journal'
+import { Route as AppLearningRouteImport } from './routes/_app/learning'
+import { Route as AppProjectsRouteImport } from './routes/_app/projects'
+import { Route as AppReviewRouteImport } from './routes/_app/review'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppTasksRouteImport } from './routes/_app/tasks'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAcademicsRoute = AuthenticatedAcademicsRouteImport.update({
+const AppAcademicsRoute = AppAcademicsRouteImport.update({
   id: '/academics',
   path: '/academics',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
+const AppCalendarRoute = AppCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+const AppFinanceRoute = AppFinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
+const AppGoalsRoute = AppGoalsRouteImport.update({
   id: '/goals',
   path: '/goals',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedHabitsRoute = AuthenticatedHabitsRouteImport.update({
+const AppHabitsRoute = AppHabitsRouteImport.update({
   id: '/habits',
   path: '/habits',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
+const AppJournalRoute = AppJournalRouteImport.update({
   id: '/journal',
   path: '/journal',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedLearningRoute = AuthenticatedLearningRouteImport.update({
+const AppLearningRoute = AppLearningRouteImport.update({
   id: '/learning',
   path: '/learning',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedProjectsRoute = AuthenticatedProjectsRouteImport.update({
+const AppProjectsRoute = AppProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedReviewRoute = AuthenticatedReviewRouteImport.update({
+const AppReviewRoute = AppReviewRouteImport.update({
   id: '/review',
   path: '/review',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
+const AppTasksRoute = AppTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/academics': typeof AuthenticatedAcademicsRoute
-  '/calendar': typeof AuthenticatedCalendarRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/finance': typeof AuthenticatedFinanceRoute
-  '/goals': typeof AuthenticatedGoalsRoute
-  '/habits': typeof AuthenticatedHabitsRoute
-  '/journal': typeof AuthenticatedJournalRoute
-  '/learning': typeof AuthenticatedLearningRoute
-  '/projects': typeof AuthenticatedProjectsRoute
-  '/review': typeof AuthenticatedReviewRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/tasks': typeof AuthenticatedTasksRoute
+  '/academics': typeof AppAcademicsRoute
+  '/calendar': typeof AppCalendarRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/finance': typeof AppFinanceRoute
+  '/goals': typeof AppGoalsRoute
+  '/habits': typeof AppHabitsRoute
+  '/journal': typeof AppJournalRoute
+  '/learning': typeof AppLearningRoute
+  '/projects': typeof AppProjectsRoute
+  '/review': typeof AppReviewRoute
+  '/settings': typeof AppSettingsRoute
+  '/tasks': typeof AppTasksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/academics': typeof AuthenticatedAcademicsRoute
-  '/calendar': typeof AuthenticatedCalendarRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/finance': typeof AuthenticatedFinanceRoute
-  '/goals': typeof AuthenticatedGoalsRoute
-  '/habits': typeof AuthenticatedHabitsRoute
-  '/journal': typeof AuthenticatedJournalRoute
-  '/learning': typeof AuthenticatedLearningRoute
-  '/projects': typeof AuthenticatedProjectsRoute
-  '/review': typeof AuthenticatedReviewRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/tasks': typeof AuthenticatedTasksRoute
+  '/academics': typeof AppAcademicsRoute
+  '/calendar': typeof AppCalendarRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/finance': typeof AppFinanceRoute
+  '/goals': typeof AppGoalsRoute
+  '/habits': typeof AppHabitsRoute
+  '/journal': typeof AppJournalRoute
+  '/learning': typeof AppLearningRoute
+  '/projects': typeof AppProjectsRoute
+  '/review': typeof AppReviewRoute
+  '/settings': typeof AppSettingsRoute
+  '/tasks': typeof AppTasksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/academics': typeof AuthenticatedAcademicsRoute
-  '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
-  '/_authenticated/goals': typeof AuthenticatedGoalsRoute
-  '/_authenticated/habits': typeof AuthenticatedHabitsRoute
-  '/_authenticated/journal': typeof AuthenticatedJournalRoute
-  '/_authenticated/learning': typeof AuthenticatedLearningRoute
-  '/_authenticated/projects': typeof AuthenticatedProjectsRoute
-  '/_authenticated/review': typeof AuthenticatedReviewRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_app': typeof AppRouteRouteWithChildren
+  '/_app/academics': typeof AppAcademicsRoute
+  '/_app/calendar': typeof AppCalendarRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/finance': typeof AppFinanceRoute
+  '/_app/goals': typeof AppGoalsRoute
+  '/_app/habits': typeof AppHabitsRoute
+  '/_app/journal': typeof AppJournalRoute
+  '/_app/learning': typeof AppLearningRoute
+  '/_app/projects': typeof AppProjectsRoute
+  '/_app/review': typeof AppReviewRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/tasks': typeof AppTasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/auth'
-    | '/reset-password'
     | '/academics'
     | '/calendar'
     | '/dashboard'
@@ -180,8 +160,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
-    | '/reset-password'
     | '/academics'
     | '/calendar'
     | '/dashboard'
@@ -197,28 +175,24 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/auth'
-    | '/reset-password'
-    | '/_authenticated/academics'
-    | '/_authenticated/calendar'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/finance'
-    | '/_authenticated/goals'
-    | '/_authenticated/habits'
-    | '/_authenticated/journal'
-    | '/_authenticated/learning'
-    | '/_authenticated/projects'
-    | '/_authenticated/review'
-    | '/_authenticated/settings'
-    | '/_authenticated/tasks'
+    | '/_app'
+    | '/_app/academics'
+    | '/_app/calendar'
+    | '/_app/dashboard'
+    | '/_app/finance'
+    | '/_app/goals'
+    | '/_app/habits'
+    | '/_app/journal'
+    | '/_app/learning'
+    | '/_app/projects'
+    | '/_app/review'
+    | '/_app/settings'
+    | '/_app/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -230,152 +204,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_app': {
+      id: '/_app'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/academics': {
-      id: '/_authenticated/academics'
+    '/_app/academics': {
+      id: '/_app/academics'
       path: '/academics'
       fullPath: '/academics'
-      preLoaderRoute: typeof AuthenticatedAcademicsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppAcademicsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/calendar': {
-      id: '/_authenticated/calendar'
+    '/_app/calendar': {
+      id: '/_app/calendar'
       path: '/calendar'
       fullPath: '/calendar'
-      preLoaderRoute: typeof AuthenticatedCalendarRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppCalendarRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/finance': {
-      id: '/_authenticated/finance'
+    '/_app/finance': {
+      id: '/_app/finance'
       path: '/finance'
       fullPath: '/finance'
-      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppFinanceRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/goals': {
-      id: '/_authenticated/goals'
+    '/_app/goals': {
+      id: '/_app/goals'
       path: '/goals'
       fullPath: '/goals'
-      preLoaderRoute: typeof AuthenticatedGoalsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppGoalsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/habits': {
-      id: '/_authenticated/habits'
+    '/_app/habits': {
+      id: '/_app/habits'
       path: '/habits'
       fullPath: '/habits'
-      preLoaderRoute: typeof AuthenticatedHabitsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppHabitsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/journal': {
-      id: '/_authenticated/journal'
+    '/_app/journal': {
+      id: '/_app/journal'
       path: '/journal'
       fullPath: '/journal'
-      preLoaderRoute: typeof AuthenticatedJournalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppJournalRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/learning': {
-      id: '/_authenticated/learning'
+    '/_app/learning': {
+      id: '/_app/learning'
       path: '/learning'
       fullPath: '/learning'
-      preLoaderRoute: typeof AuthenticatedLearningRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppLearningRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/projects': {
-      id: '/_authenticated/projects'
+    '/_app/projects': {
+      id: '/_app/projects'
       path: '/projects'
       fullPath: '/projects'
-      preLoaderRoute: typeof AuthenticatedProjectsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppProjectsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/review': {
-      id: '/_authenticated/review'
+    '/_app/review': {
+      id: '/_app/review'
       path: '/review'
       fullPath: '/review'
-      preLoaderRoute: typeof AuthenticatedReviewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppReviewRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
+    '/_app/settings': {
+      id: '/_app/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/_authenticated/tasks': {
-      id: '/_authenticated/tasks'
+    '/_app/tasks': {
+      id: '/_app/tasks'
       path: '/tasks'
       fullPath: '/tasks'
-      preLoaderRoute: typeof AuthenticatedTasksRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof AppTasksRouteImport
+      parentRoute: typeof AppRouteRoute
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAcademicsRoute: typeof AuthenticatedAcademicsRoute
-  AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
-  AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
-  AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
-  AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
-  AuthenticatedLearningRoute: typeof AuthenticatedLearningRoute
-  AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRoute
-  AuthenticatedReviewRoute: typeof AuthenticatedReviewRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+interface AppRouteRouteChildren {
+  AppAcademicsRoute: typeof AppAcademicsRoute
+  AppCalendarRoute: typeof AppCalendarRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppFinanceRoute: typeof AppFinanceRoute
+  AppGoalsRoute: typeof AppGoalsRoute
+  AppHabitsRoute: typeof AppHabitsRoute
+  AppJournalRoute: typeof AppJournalRoute
+  AppLearningRoute: typeof AppLearningRoute
+  AppProjectsRoute: typeof AppProjectsRoute
+  AppReviewRoute: typeof AppReviewRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTasksRoute: typeof AppTasksRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAcademicsRoute: AuthenticatedAcademicsRoute,
-  AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
-  AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
-  AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
-  AuthenticatedJournalRoute: AuthenticatedJournalRoute,
-  AuthenticatedLearningRoute: AuthenticatedLearningRoute,
-  AuthenticatedProjectsRoute: AuthenticatedProjectsRoute,
-  AuthenticatedReviewRoute: AuthenticatedReviewRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAcademicsRoute: AppAcademicsRoute,
+  AppCalendarRoute: AppCalendarRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppFinanceRoute: AppFinanceRoute,
+  AppGoalsRoute: AppGoalsRoute,
+  AppHabitsRoute: AppHabitsRoute,
+  AppJournalRoute: AppJournalRoute,
+  AppLearningRoute: AppLearningRoute,
+  AppProjectsRoute: AppProjectsRoute,
+  AppReviewRoute: AppReviewRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTasksRoute: AppTasksRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
