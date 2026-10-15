@@ -1,21 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  useTable,
-  useTableByUserId,
   createMutations,
   initStore,
   exportData,
   importData,
   wipeData,
   selectAll,
-  selectById,
   insertRow,
   updateRow,
-  deleteRow,
 } from "./store";
 
-export { insertRow, updateRow, initStore, selectAll, selectById, deleteRow };
+export { insertRow, updateRow, initStore, selectAll };
 
 type Tables = {
   tasks: any;

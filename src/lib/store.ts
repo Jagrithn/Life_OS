@@ -1,71 +1,77 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import type { AnyRow, TableName } from "./local-db";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
-  getAll,
-  getById,
-  getByIndex,
-  put,
-  putMany,
   del,
-  delByIndex,
+  put,
+  getAll,
+  putMany,
   clear,
   exportAll,
   importAll,
   wipeAll,
+  type AnyRow,
+  type TableName,
 } from "./local-db";
 
 const SCHEMA_VERSION = 1;
 const SCHEMA_KEY = "ordo:schema";
 
-export type Row<T extends TableName> = AnyRow & { table: T };
+const TABLES: TableName[] = [
+  "tasks",
+  "goals",
+  "habits",
+  "habit_logs",
+  "journal_entries",
+  "transactions",
+  "projects",
+  "milestones",
+  "events",
+  "terms",
+  "courses",
+  "assessments",
+  "books",
+  "learning_logs",
+  "weekly_reviews",
+  "investments",
+  "profiles",
+  "settings",
+];
 
-interface StoreState {
-  tables: Map<TableName, Map<string, AnyRow>>;
-  listeners: Set<() => void>;
-}
+type Tables = Map<TableName, Map<string, AnyRow>>;
+type Listener = () => void;
 
-const state: StoreState = {
-  tables: new Map(),
-  listeners: new Set(),
-};
+const tables: Tables = new Map();
+const listeners = new Set<Listener>();
 
 function emit() {
-  for (const l of state.listeners) l();
+  for (const l of listeners) l();
 }
 
-function subscribe(fn: () => void) {
-  state.listeners.add(fn);
-  return () => state.listeners.delete(fn);
+function subscribe(listener: Listener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
-function getSnapshot() {
-  return state;
-}
-
-function getServerSnapshot() {
-  return state;
-}
+// Stable read accessors for useSyncExternalStore — same value on every call.
+const getSnapshot = () => tables;
+const getServerSnapshot = () => tables;
 
 export function useStore() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 function ensureTable(table: TableName) {
-  if (!state.tables.has(table)) state.tables.set(table, new Map());
-  return state.tables.get(table)!;
+  let map = tables.get(table);
+  if (!map) {
+    map = new Map();
+    tables.set(table, map);
+  }
+  return map;
 }
 
-export function selectAll<T extends TableName>(table: T): AnyRow[] {
-  const rows = ensureTable(table).values();
-  return Array.from(rows);
-}
-
-export function selectById<T extends TableName>(table: T, id: string): AnyRow | undefined {
-  return ensureTable(table).get(id);
-}
-
-export function selectByUserId<T extends TableName>(table: T, userId: string): AnyRow[] {
-  return selectAll(table).filter((r) => r["user_id"] === userId);
+export function selectAll(table: TableName): AnyRow[] {
+  return Array.from(ensureTable(table).values());
 }
 
 function nowISO() {
@@ -73,12 +79,14 @@ function nowISO() {
 }
 
 function genId() {
-  return crypto.randomUUID();
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export async function insertRow<T extends TableName>(
-  table: T,
-  values: Omit<AnyRow, "id" | "created_at" | "updated_at"> & Partial<Pick<AnyRow, "id">>,
+export async function insertRow(
+  table: TableName,
+  values: Record<string, unknown> & { id?: string },
 ): Promise<AnyRow> {
   const row: AnyRow = {
     id: values.id ?? genId(),
@@ -92,14 +100,14 @@ export async function insertRow<T extends TableName>(
   return row;
 }
 
-export async function updateRow<T extends TableName>(
-  table: T,
+export async function updateRow(
+  table: TableName,
   id: string,
-  values: Partial<AnyRow>,
+  values: Record<string, unknown>,
 ): Promise<void> {
   const existing = ensureTable(table).get(id);
   if (!existing) throw new Error(`Row ${id} not found in ${table}`);
-  const row = { ...existing, ...values, updated_at: nowISO() };
+  const row: AnyRow = { ...existing, ...values, updated_at: nowISO() };
   await put(table, row);
   ensureTable(table).set(id, row);
   emit();
@@ -111,47 +119,12 @@ export async function deleteRow(table: TableName, id: string): Promise<void> {
   emit();
 }
 
-export async function deleteByUserId(table: TableName, userId: string): Promise<number> {
-  let count = 0;
-  const toDelete: string[] = [];
-  for (const [id, row] of ensureTable(table)) {
-    if (row["user_id"] === userId) toDelete.push(id);
-  }
-  for (const id of toDelete) {
-    await del(table, id);
-    ensureTable(table).delete(id);
-    count++;
-  }
-  if (count > 0) emit();
-  return count;
-}
-
 export async function loadAll(): Promise<void> {
-  const tables: TableName[] = [
-    "tasks",
-    "goals",
-    "habits",
-    "habit_logs",
-    "journal_entries",
-    "transactions",
-    "projects",
-    "milestones",
-    "events",
-    "terms",
-    "courses",
-    "assessments",
-    "books",
-    "learning_logs",
-    "weekly_reviews",
-    "investments",
-    "profiles",
-    "settings",
-  ];
-  for (const t of tables) {
+  for (const t of TABLES) {
     const rows = await getAll<AnyRow>(t);
     const map = new Map<string, AnyRow>();
     for (const r of rows) map.set(r.id, r);
-    state.tables.set(t, map);
+    tables.set(t, map);
   }
   emit();
 }
@@ -167,52 +140,43 @@ export async function importData(data: Record<string, unknown[]>): Promise<void>
 
 export async function wipeData(): Promise<void> {
   await wipeAll();
-  for (const t of state.tables.keys()) state.tables.get(t)!.clear();
+  for (const map of tables.values()) map.clear();
   emit();
 }
 
 async function migrate(oldVersion: number): Promise<void> {
-  if (oldVersion === 0) {
-    // Fresh install - nothing to migrate
-  }
+  if (oldVersion === 0) return; // fresh install, nothing to migrate
 }
 
 export async function initStore(): Promise<void> {
-  const stored = localStorage.getItem(SCHEMA_KEY);
-  const currentVersion = stored ? parseInt(stored, 10) : 0;
-  if (currentVersion < SCHEMA_VERSION) {
-    await migrate(currentVersion);
-    localStorage.setItem(SCHEMA_KEY, String(SCHEMA_VERSION));
+  if (typeof localStorage !== "undefined") {
+    const stored = localStorage.getItem(SCHEMA_KEY);
+    const currentVersion = stored ? parseInt(stored, 10) : 0;
+    if (currentVersion < SCHEMA_VERSION) {
+      await migrate(currentVersion);
+      localStorage.setItem(SCHEMA_KEY, String(SCHEMA_VERSION));
+    }
   }
   await loadAll();
 }
 
-export function useTable<T extends TableName>(table: T) {
-  const store = useStore();
-  const rows = store.tables.get(table)?.values() ?? [];
-  const [, forceUpdate] = useState({});
-  const force = () => forceUpdate({});
+/** Subscribes to the store and returns every row of a table in insertion order. */
+export function useTable(table: TableName): AnyRow[] {
+  useStore();
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    const unsub: () => void = subscribe(force);
+    const unsub = subscribe(() => setVersion((v) => v + 1));
     return unsub;
   }, []);
 
-  return Array.from(rows) as AnyRow[];
+  return selectAll(table);
 }
 
-export function useTableByUserId<T extends TableName>(table: T, userId: string | undefined) {
-  const all = useTable(table);
-  if (!userId) return [];
-  return all.filter((r) => r["user_id"] === userId);
-}
-
-export function createMutations<T extends TableName>(table: T) {
+export function createMutations(table: TableName) {
   return {
-    insert: async (
-      values: Omit<AnyRow, "id" | "created_at" | "updated_at"> & Partial<Pick<AnyRow, "id">>,
-    ) => insertRow(table, values),
-    update: async (id: string, values: Partial<AnyRow>) => updateRow(table, id, values),
-    remove: async (id: string) => deleteRow(table, id),
+    insert: (values: Record<string, unknown> & { id?: string }) => insertRow(table, values),
+    update: (id: string, values: Record<string, unknown>) => updateRow(table, id, values),
+    remove: (id: string) => deleteRow(table, id),
   };
 }

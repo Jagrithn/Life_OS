@@ -29,48 +29,36 @@ export interface RowBase {
 
 export type AnyRow = RowBase & Record<string, unknown>;
 
-interface OpenDBOptions {
-  onUpgrade?: (db: IDBDatabase, oldVersion: number, newVersion: number) => void;
+const TABLES: TableName[] = [
+  "tasks",
+  "goals",
+  "habits",
+  "habit_logs",
+  "journal_entries",
+  "transactions",
+  "projects",
+  "milestones",
+  "events",
+  "terms",
+  "courses",
+  "assessments",
+  "books",
+  "learning_logs",
+  "weekly_reviews",
+  "investments",
+  "profiles",
+  "settings",
+];
+
+function isTable(value: string): value is TableName {
+  return (TABLES as string[]).includes(value);
 }
 
-function openDB(opts: OpenDBOptions = {}): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = req.result;
-      const oldVersion = e.oldVersion;
-      const newVersion = e.newVersion;
-      for (const name of [
-        "tasks",
-        "goals",
-        "habits",
-        "habit_logs",
-        "journal_entries",
-        "transactions",
-        "projects",
-        "milestones",
-        "events",
-        "terms",
-        "courses",
-        "assessments",
-        "books",
-        "learning_logs",
-        "weekly_reviews",
-        "investments",
-        "profiles",
-        "settings",
-      ]) {
-        if (!db.objectStoreNames.contains(name)) {
-          const store = db.createObjectStore(name, { keyPath: "id" });
-          store.createIndex("user_id", "user_id", { unique: false });
-          store.createIndex("created_at", "created_at", { unique: false });
-        }
-      }
-      if (opts.onUpgrade) opts.onUpgrade(db, oldVersion, newVersion ?? 0);
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+// IndexedDB only exists in a secure browser context. Any helper reached on the
+// server (e.g. a stray import during SSR) degrades to empty results instead of
+// throwing a ReferenceError and taking the page down.
+function dbUnavailable(): boolean {
+  return typeof indexedDB === "undefined";
 }
 
 function tx<T>(
@@ -78,6 +66,7 @@ function tx<T>(
   mode: IDBTransactionMode,
   fn: (stores: Map<string, IDBObjectStore>) => T,
 ): Promise<T> {
+  if (dbUnavailable()) return Promise.resolve(undefined as unknown as T);
   return openDB().then((db) => {
     const names = Array.isArray(storeNames) ? storeNames : [storeNames];
     return new Promise<T>((resolve, reject) => {
@@ -91,40 +80,29 @@ function tx<T>(
   });
 }
 
+function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      for (const name of TABLES) {
+        if (!db.objectStoreNames.contains(name)) {
+          const store = db.createObjectStore(name, { keyPath: "id" });
+          store.createIndex("user_id", "user_id", { unique: false });
+          store.createIndex("created_at", "created_at", { unique: false });
+        }
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 export async function getAll<T extends AnyRow>(table: TableName): Promise<T[]> {
   return tx(table, "readonly", (stores) => {
     const store = stores.get(table)!;
     return new Promise<T[]>((resolve, reject) => {
       const req = store.getAll();
-      req.onsuccess = () => resolve(req.result as T[]);
-      req.onerror = () => reject(req.error);
-    });
-  });
-}
-
-export async function getById<T extends AnyRow>(
-  table: TableName,
-  id: string,
-): Promise<T | undefined> {
-  return tx(table, "readonly", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<T | undefined>((resolve, reject) => {
-      const req = store.get(id);
-      req.onsuccess = () => resolve(req.result as T | undefined);
-      req.onerror = () => reject(req.error);
-    });
-  });
-}
-
-export async function getByIndex<T extends AnyRow>(
-  table: TableName,
-  indexName: string,
-  value: string,
-): Promise<T[]> {
-  return tx(table, "readonly", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<T[]>((resolve, reject) => {
-      const req = store.index(indexName).getAll(value);
       req.onsuccess = () => resolve(req.result as T[]);
       req.onerror = () => reject(req.error);
     });
@@ -161,32 +139,6 @@ export async function del(table: TableName, id: string): Promise<void> {
   });
 }
 
-export async function delByIndex(
-  table: TableName,
-  indexName: string,
-  value: string,
-): Promise<number> {
-  return tx(table, "readwrite", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<number>((resolve, reject) => {
-      const index = store.index(indexName);
-      let count = 0;
-      const req = index.openCursor(IDBKeyRange.only(value));
-      req.onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest).result;
-        if (cursor) {
-          count++;
-          cursor.delete();
-          cursor.continue();
-        } else {
-          resolve(count);
-        }
-      };
-      req.onerror = () => reject(req.error);
-    });
-  });
-}
-
 export async function clear(table: TableName): Promise<void> {
   return tx(table, "readwrite", (stores) => {
     const store = stores.get(table)!;
@@ -198,62 +150,37 @@ export async function clear(table: TableName): Promise<void> {
   });
 }
 
+function genImportId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+/** Fills in required bookkeeping fields so a hand-edited or legacy export still works. */
+function normalize(row: unknown): AnyRow {
+  const source = (row ?? {}) as Record<string, unknown>;
+  const now = new Date().toISOString();
+  return {
+    ...source,
+    id: String(source["id"] ?? genImportId()),
+    created_at: String(source["created_at"] ?? now),
+    updated_at: String(source["updated_at"] ?? now),
+  } as AnyRow;
+}
+
 export async function exportAll(): Promise<Record<string, unknown[]>> {
-  const tables: TableName[] = [
-    "tasks",
-    "goals",
-    "habits",
-    "habit_logs",
-    "journal_entries",
-    "transactions",
-    "projects",
-    "milestones",
-    "events",
-    "terms",
-    "courses",
-    "assessments",
-    "books",
-    "learning_logs",
-    "weekly_reviews",
-    "investments",
-    "profiles",
-    "settings",
-  ];
   const out: Record<string, unknown[]> = {};
-  for (const t of tables) {
-    out[t] = await getAll(t);
-  }
+  for (const t of TABLES) out[t] = await getAll(t);
   return out;
 }
 
 export async function importAll(data: Record<string, unknown[]>): Promise<void> {
   for (const [table, rows] of Object.entries(data)) {
-    if (rows.length > 0) {
-      await putMany(table as TableName, rows as AnyRow[]);
-    }
+    if (!isTable(table) || !Array.isArray(rows) || rows.length === 0) continue;
+    await putMany(table, rows.map(normalize));
   }
 }
 
 export async function wipeAll(): Promise<void> {
-  const tables: TableName[] = [
-    "habit_logs",
-    "events",
-    "tasks",
-    "milestones",
-    "projects",
-    "habits",
-    "journal_entries",
-    "transactions",
-    "goals",
-    "assessments",
-    "courses",
-    "terms",
-    "books",
-    "learning_logs",
-    "weekly_reviews",
-    "investments",
-    "profiles",
-    "settings",
-  ];
-  for (const t of tables) await clear(t);
+  for (const t of TABLES) await clear(t);
 }

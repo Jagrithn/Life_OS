@@ -55,12 +55,18 @@ function SettingsPage() {
 
   async function handleImport() {
     if (!importFile) return;
-    const text = await importFile.text();
-    const data = JSON.parse(text);
-    await importAllData(data);
-    qc.invalidateQueries();
-    toast.success("Imported successfully");
-    setImportFile(null);
+    try {
+      const data = JSON.parse(await importFile.text());
+      if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new Error("That file isn't an Ordo export.");
+      }
+      await importAllData(data);
+      qc.invalidateQueries();
+      toast.success("Imported successfully");
+      setImportFile(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not read that file");
+    }
   }
 
   async function wipe() {
