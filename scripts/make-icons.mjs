@@ -71,8 +71,8 @@ function drawRing(size, { tile }) {
   const rgba = Buffer.alloc(size * size * 4);
   const half = size / 2;
   const corner = size * 0.21;
-  const outerR = size * 0.3;
-  const thickness = size * 0.075;
+  const outerR = size * 0.379;
+  const thickness = size * 0.1016;
   const innerR = outerR - thickness;
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
