@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import {
   del,
   put,
@@ -42,7 +42,12 @@ type Listener = () => void;
 const tables: Tables = new Map();
 const listeners = new Set<Listener>();
 
+// Bumped on every change. useSyncExternalStore compares the snapshot with
+// Object.is, so returning the (stable) `tables` map would never re-render.
+let version = 0;
+
 function emit() {
+  version += 1;
   for (const l of listeners) l();
 }
 
@@ -54,8 +59,8 @@ function subscribe(listener: Listener) {
 }
 
 // Stable read accessors for useSyncExternalStore — same value on every call.
-const getSnapshot = () => tables;
-const getServerSnapshot = () => tables;
+const getSnapshot = () => version;
+const getServerSnapshot = () => version;
 
 export function useStore() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -88,11 +93,12 @@ export async function insertRow(
   table: TableName,
   values: Record<string, unknown> & { id?: string },
 ): Promise<AnyRow> {
+  const now = nowISO();
   const row: AnyRow = {
-    id: values.id ?? genId(),
-    created_at: nowISO(),
-    updated_at: nowISO(),
     ...values,
+    id: (values.id as string) ?? genId(),
+    created_at: (values["created_at"] as string) ?? now,
+    updated_at: now,
   } as AnyRow;
   await put(table, row);
   ensureTable(table).set(row.id, row);
@@ -107,7 +113,7 @@ export async function updateRow(
 ): Promise<void> {
   const existing = ensureTable(table).get(id);
   if (!existing) throw new Error(`Row ${id} not found in ${table}`);
-  const row: AnyRow = { ...existing, ...values, updated_at: nowISO() };
+  const row: AnyRow = { ...existing, ...values, id, updated_at: nowISO() };
   await put(table, row);
   ensureTable(table).set(id, row);
   emit();
@@ -163,13 +169,6 @@ export async function initStore(): Promise<void> {
 /** Subscribes to the store and returns every row of a table in insertion order. */
 export function useTable(table: TableName): AnyRow[] {
   useStore();
-  const [version, setVersion] = useState(0);
-
-  useEffect(() => {
-    const unsub = subscribe(() => setVersion((v) => v + 1));
-    return unsub;
-  }, []);
-
   return selectAll(table);
 }
 

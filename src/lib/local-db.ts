@@ -61,27 +61,11 @@ function dbUnavailable(): boolean {
   return typeof indexedDB === "undefined";
 }
 
-function tx<T>(
-  storeNames: string | string[],
-  mode: IDBTransactionMode,
-  fn: (stores: Map<string, IDBObjectStore>) => T,
-): Promise<T> {
-  if (dbUnavailable()) return Promise.resolve(undefined as unknown as T);
-  return openDB().then((db) => {
-    const names = Array.isArray(storeNames) ? storeNames : [storeNames];
-    return new Promise<T>((resolve, reject) => {
-      const txn = db.transaction(names, mode);
-      const stores = new Map<string, IDBObjectStore>();
-      for (const name of names) stores.set(name, txn.objectStore(name));
-      txn.oncomplete = () => resolve(fn(stores));
-      txn.onerror = () => reject(txn.error);
-      txn.onabort = () => reject(txn.error);
-    });
-  });
-}
+let dbPromise: Promise<IDBDatabase> | null = null;
 
 function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -93,61 +77,95 @@ function openDB(): Promise<IDBDatabase> {
         }
       }
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      const db = req.result;
+      // Close and drop the cache when another tab upgrades the schema.
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
+      resolve(db);
+    };
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error ?? new Error("Failed to open the local database"));
+    };
   });
+  return dbPromise;
 }
 
-export async function getAll<T extends AnyRow>(table: TableName): Promise<T[]> {
-  return tx(table, "readonly", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<T[]>((resolve, reject) => {
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result as T[]);
-      req.onerror = () => reject(req.error);
-    });
-  });
+/**
+ * Runs a synchronous operation against one object store while its transaction
+ * is still alive. The action MUST issue its request(s) synchronously: awaiting
+ * anything first lets the transaction auto-commit, and any later access throws
+ * `TransactionInactiveError`. The returned promise settles once the transaction
+ * finishes (reads resolve with the request's result).
+ */
+function withStore<T = void>(
+  table: TableName,
+  mode: IDBTransactionMode,
+  action: (store: IDBObjectStore) => IDBRequest | void,
+): Promise<T> {
+  if (dbUnavailable()) return Promise.resolve(undefined as unknown as T);
+  return openDB().then(
+    (db) =>
+      new Promise<T>((resolve, reject) => {
+        let result: unknown;
+        let settled = false;
+        const txn = db.transaction(table, mode);
+        const store = txn.objectStore(table);
+        txn.oncomplete = () => {
+          if (settled) return;
+          settled = true;
+          resolve(result as T);
+        };
+        txn.onerror = () => {
+          if (settled) return;
+          settled = true;
+          reject(txn.error ?? new Error("IndexedDB transaction failed"));
+        };
+        txn.onabort = () => {
+          if (settled) return;
+          settled = true;
+          reject(txn.error ?? new Error("IndexedDB transaction aborted"));
+        };
+        try {
+          const req = action(store);
+          if (req) req.onsuccess = () => (result = req.result);
+        } catch (error) {
+          settled = true;
+          try {
+            txn.abort();
+          } catch {
+            /* transaction already finished */
+          }
+          reject(error);
+        }
+      }),
+  );
+}
+
+export function getAll<T extends AnyRow>(table: TableName): Promise<T[]> {
+  return withStore<T[]>(table, "readonly", (store) => store.getAll());
 }
 
 export async function put<T extends AnyRow>(table: TableName, row: T): Promise<void> {
-  return tx(table, "readwrite", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<void>((resolve, reject) => {
-      const req = store.put(row);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  });
+  await withStore(table, "readwrite", (store) => store.put(row));
 }
 
 export async function putMany<T extends AnyRow>(table: TableName, rows: T[]): Promise<void> {
   if (rows.length === 0) return;
-  return tx(table, "readwrite", (stores) => {
-    const store = stores.get(table)!;
+  await withStore(table, "readwrite", (store) => {
     for (const row of rows) store.put(row);
   });
 }
 
 export async function del(table: TableName, id: string): Promise<void> {
-  return tx(table, "readwrite", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<void>((resolve, reject) => {
-      const req = store.delete(id);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  });
+  await withStore(table, "readwrite", (store) => store.delete(id));
 }
 
 export async function clear(table: TableName): Promise<void> {
-  return tx(table, "readwrite", (stores) => {
-    const store = stores.get(table)!;
-    return new Promise<void>((resolve, reject) => {
-      const req = store.clear();
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
-  });
+  await withStore(table, "readwrite", (store) => store.clear());
 }
 
 function genImportId() {
