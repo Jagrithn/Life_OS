@@ -174,8 +174,13 @@ function AppShell() {
 
       <CommandPalette enabled={enabled} onSignOut={() => {}} open={cmdk} onOpenChange={setCmdk} />
 
-      <Dialog open={needsSetup} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-xl" onInteractOutside={(e) => e.preventDefault()}>
+      <Dialog
+        open={needsSetup}
+        onOpenChange={(open) => {
+          if (!open) void finishSetup();
+        }}
+      >
+        <DialogContent className="flex max-h-[90dvh] flex-col sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="font-heading text-xl">Make Ordo yours</DialogTitle>
             <DialogDescription>
@@ -183,7 +188,9 @@ function AppShell() {
               section never deletes its data.
             </DialogDescription>
           </DialogHeader>
-          <ModulePicker value={mods} onChange={setMods} />
+          <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
+            <ModulePicker value={mods} onChange={setMods} />
+          </div>
           <Button onClick={finishSetup} className="w-full">
             Continue
           </Button>
